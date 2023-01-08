@@ -1,4 +1,6 @@
 /*
 
 !.gitignore
+!pubspec.lock
+!pubspec.yaml
 !/lib/
