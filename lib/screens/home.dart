@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:todo_time_app/constant/vars.dart';
-import 'package:todo_time_app/models/time.dart';
-import 'package:todo_time_app/models/todo.dart';
 import 'package:todo_time_app/widget/hours.dart';
+import 'package:todo_time_app/widget/time.dart';
+import 'package:todo_time_app/widget/todo.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -70,48 +70,86 @@ class HomeScreen extends StatelessWidget {
                       GestureDetector(
                         onTap: () {
                           // TOD: Change to GetX
-                          Navigator.of(context).push(HeroDialogRoute(
-                              builder: (context) => const Center(
-                                    child: CardModel(
-                                      id: "important",
-                                      cardColor: mainColor,
-                                    ),
-                                  )));
+                          Navigator.of(context).push(
+                            HeroDialogRoute(
+                                builder: (context) => const Center(
+                                      child: CardModel(
+                                        id: "important",
+                                        cardColor: mainColor,
+                                      ),
+                                    )),
+                          );
                         },
                         child: Hero(
                           tag: "important",
                           child: Container(
-                            height: 150,
+                            height: 175,
                             width: (MediaQuery.of(context).size.width / 2) - 10,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               color: mainColor,
                             ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: ListView.builder(
+                                itemCount: 5,
+                                shrinkWrap: false,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return HourWidget(
+                                    task: "Will Change",
+                                    hour: index,
+                                    txtBgColor: mainColor,
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(
-                        height: 50,
+                        height: 55,
                       ),
                       GestureDetector(
                         onTap: () {
                           // TOD: Change to GetX
-                          Navigator.of(context).push(HeroDialogRoute(
-                              builder: (context) => const Center(
-                                    child: CardModel(
-                                      id: "unimportant",
-                                      cardColor: secColor,
-                                    ),
-                                  )));
+                          Navigator.of(context).push(
+                            HeroDialogRoute(
+                                builder: (context) => const Center(
+                                      child: CardModel(
+                                        id: "unimportant",
+                                        cardColor: secColor,
+                                      ),
+                                    )),
+                          );
                         },
                         child: Hero(
                           tag: "unimportant",
-                          child: Container(
-                            height: 150,
-                            width: (MediaQuery.of(context).size.width / 2) - 10,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: secColor,
+                          child: SingleChildScrollView(
+                            child: Container(
+                              height: 175,
+                              width:
+                                  (MediaQuery.of(context).size.width / 2) - 10,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: secColor,
+                              ),
+                              child: SizedBox(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: ListView.builder(
+                                    itemCount: 5,
+                                    shrinkWrap: true,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return HourWidget(
+                                        task: "Will Change 2",
+                                        hour: index,
+                                        txtBgColor: secColor,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -124,13 +162,15 @@ class HomeScreen extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       // TOD: Change to GetX
-                      Navigator.of(context).push(HeroDialogRoute(
-                          builder: (context) => const Center(
-                                child: TimeModel(
-                                  id: "time",
-                                  timeColor: terColor,
-                                ),
-                              )));
+                      Navigator.of(context).push(
+                        HeroDialogRoute(
+                            builder: (context) => const Center(
+                                  child: TimeModel(
+                                    id: "time",
+                                    timeColor: terColor,
+                                  ),
+                                )),
+                      );
                     },
                     child: SingleChildScrollView(
                       child: SafeArea(
@@ -161,6 +201,7 @@ class HomeScreen extends StatelessWidget {
                                           return HourWidget(
                                             task: "TEST",
                                             hour: index,
+                                            txtBgColor: terColor,
                                           );
                                         },
                                       ),
@@ -193,8 +234,13 @@ class HomeNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
+        BottomNavigationBarItem(
+            icon: Icon(
+              Icons.home,
+            ),
+            label: "Home"),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month), label: "Date"),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
       ],
       backgroundColor: Colors.black,
@@ -214,7 +260,12 @@ class HomeAppBar extends StatelessWidget with PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
-      leading: const InkWell(child: Icon(Icons.grid_view_rounded)),
+      leading: const InkWell(
+          child: Icon(
+        Icons.add_circle,
+        size: 40,
+        color: Colors.white,
+      )),
       actions: [
         Container(
             margin: const EdgeInsets.only(right: 20),
