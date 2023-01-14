@@ -1,5 +1,5 @@
-class ImportantCard {
-  const ImportantCard({
+class CardDataModel {
+  const CardDataModel({
     required this.cardId,
     required this.items,
   });

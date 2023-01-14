@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todo_time_app/widget/hours.dart';
 
 class CardModel extends StatelessWidget {
   const CardModel({required this.id, required this.cardColor, super.key});
@@ -38,10 +37,13 @@ class CardModel extends StatelessWidget {
                         itemCount: 24,
                         shrinkWrap: true,
                         itemBuilder: (BuildContext context, int index) {
-                          return HourWidget(
-                            task: "RIGHT",
-                            hour: index,
-                            txtBgColor: cardColor,
+                          return Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                child: Text("$index. Testing"),
+                              ),
+                            ],
                           );
                         },
                       ),

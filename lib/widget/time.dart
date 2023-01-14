@@ -9,8 +9,6 @@ class TimeModel extends StatelessWidget {
 
   final Color timeColor;
 
-  // TODO: Fix last 30 min widget spacing
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -25,7 +23,7 @@ class TimeModel extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width / 1.3,
-                  height: MediaQuery.of(context).size.height,
+                  height: MediaQuery.of(context).size.height / 1.2,
                   child: Container(
                     margin: const EdgeInsets.only(top: 8, bottom: 8),
                     decoration: BoxDecoration(

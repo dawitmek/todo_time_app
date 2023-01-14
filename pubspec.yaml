@@ -33,7 +33,8 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.6.5
-  shared_preferences: ^2.0.15
+  localstorage: ^4.0.0+1
+  shared_preferences: ^2.0.16
 
 dev_dependencies:
   flutter_lints: ^2.0.0

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_time_app/constant/vars.dart';
+import 'package:todo_time_app/widget/add_button.dart';
 import 'package:todo_time_app/widget/hours.dart';
 import 'package:todo_time_app/widget/time.dart';
 import 'package:todo_time_app/widget/todo.dart';
@@ -95,10 +96,18 @@ class HomeScreen extends StatelessWidget {
                                 itemCount: 5,
                                 shrinkWrap: false,
                                 itemBuilder: (BuildContext context, int index) {
-                                  return HourWidget(
-                                    task: "Will Change",
-                                    hour: index,
-                                    txtBgColor: mainColor,
+                                  return SingleChildScrollView(
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          child: DefaultTextStyle(
+                                            style: const TextStyle(),
+                                            child: Text("$index. Testing"),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   );
                                 },
                               ),
@@ -141,10 +150,16 @@ class HomeScreen extends StatelessWidget {
                                     shrinkWrap: true,
                                     itemBuilder:
                                         (BuildContext context, int index) {
-                                      return HourWidget(
-                                        task: "Will Change 2",
-                                        hour: index,
-                                        txtBgColor: secColor,
+                                      return Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(12),
+                                            child: DefaultTextStyle(
+                                              style: const TextStyle(),
+                                              child: Text("$index. Testing"),
+                                            ),
+                                          ),
+                                        ],
                                       );
                                     },
                                   ),
@@ -260,12 +275,29 @@ class HomeAppBar extends StatelessWidget with PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
-      leading: const InkWell(
-          child: Icon(
-        Icons.add_circle,
-        size: 40,
-        color: Colors.white,
-      )),
+      leading: GestureDetector(
+        child: Hero(
+          tag: "addButton",
+          child: ShaderMask(
+            shaderCallback: ((bounds) => const LinearGradient(
+                  colors: [Colors.red, Colors.yellow],
+                ).createShader(bounds)),
+            child: const Icon(
+              Icons.add_circle,
+              size: 40,
+            ),
+          ),
+        ),
+        onTap: () {
+          Navigator.of(context).push(
+            HeroDialogRoute(
+              builder: ((context) => const Center(
+                    child: AddNewCardButton(),
+                  )),
+            ),
+          );
+        },
+      ),
       actions: [
         Container(
             margin: const EdgeInsets.only(right: 20),
