@@ -62,15 +62,16 @@ class NewCardForm extends StatefulWidget {
 }
 
 class _NewCardFormState extends State<NewCardForm> {
-  
   late TextEditingController _controller;
   final prefs = SharedPreferences.getInstance();
 
   List<String> dropDownList = ["Important", "Unimportant"];
+  String? dropdownValue;
 
   @override
   void initState() {
     super.initState();
+    dropdownValue = dropDownList.first;
     _controller = TextEditingController();
   }
 
@@ -82,8 +83,6 @@ class _NewCardFormState extends State<NewCardForm> {
 
   @override
   Widget build(BuildContext context) {
-    String? dropdownValue = dropDownList.first;
-
     DateTime timeToAdd = DateTime(
         DateTime.now().year, DateTime.now().month, DateTime.now().day, 24, 0);
 
@@ -126,9 +125,11 @@ class _NewCardFormState extends State<NewCardForm> {
                     child: Center(child: Text(val)),
                   );
                 }).toList(),
-                onChanged: ((String? value) {
-                  dropdownValue = value;
-                }),
+                onChanged: (String? value) {
+                  setState(() {
+                    dropdownValue = value!;
+                  });
+                },
                 value: dropdownValue,
               ),
             ),

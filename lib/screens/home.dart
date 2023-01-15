@@ -91,27 +91,19 @@ class HomeScreen extends StatelessWidget {
                               color: mainColor,
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: ListView.builder(
-                                itemCount: 5,
-                                shrinkWrap: false,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return SingleChildScrollView(
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(12),
-                                          child: DefaultTextStyle(
-                                            style: const TextStyle(),
-                                            child: Text("$index. Testing"),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: ListView.builder(
+                                  itemCount: 5,
+                                  shrinkWrap: false,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return CardDataWidget(
+                                      index: index,
+                                      taskText: "Testing Testing Testing ",
+                                      editingActive: false,
+                                    );
+                                  },
+                                )),
                           ),
                         ),
                       ),
@@ -150,16 +142,10 @@ class HomeScreen extends StatelessWidget {
                                     shrinkWrap: true,
                                     itemBuilder:
                                         (BuildContext context, int index) {
-                                      return Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(12),
-                                            child: DefaultTextStyle(
-                                              style: const TextStyle(),
-                                              child: Text("$index. Testing"),
-                                            ),
-                                          ),
-                                        ],
+                                      return CardDataWidget(
+                                        index: index,
+                                        taskText: "Testing",
+                                        editingActive: false,
                                       );
                                     },
                                   ),
