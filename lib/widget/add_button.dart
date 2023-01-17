@@ -1,9 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo_time_app/constant/vars.dart';
+import 'package:todo_time_app/models/tasks.dart';
 
 class AddNewCardButton extends StatelessWidget {
-  const AddNewCardButton({super.key});
+  const AddNewCardButton({
+    required this.storage,
+    required this.list,
+    super.key,
+  });
+
+  final LocalStorage storage;
+  final CardDataModel list;
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +27,9 @@ class AddNewCardButton extends StatelessWidget {
           child: Material(
             borderRadius: BorderRadius.circular(16),
             color: Colors.black38,
+            textStyle: const TextStyle(
+              color: Colors.white,
+            ),
             child: SingleChildScrollView(
               child: GestureDetector(
                 onTap: () {
@@ -37,10 +50,16 @@ class AddNewCardButton extends StatelessWidget {
                         margin: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                              colors: [Colors.yellow.shade900, Colors.yellow]),
+                            colors: [
+                              Colors.grey.shade800,
+                              Colors.grey.shade300
+                            ],
+                            begin: const Alignment(-2, 0),
+                            end: const Alignment(4, 0),
+                          ),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const NewCardForm(),
+                        child: NewCardForm(storage: storage, list: list),
                       ),
                     ),
                   ],
@@ -55,7 +74,14 @@ class AddNewCardButton extends StatelessWidget {
 }
 
 class NewCardForm extends StatefulWidget {
-  const NewCardForm({super.key});
+  const NewCardForm({
+    required this.storage,
+    required this.list,
+    super.key,
+  });
+
+  final LocalStorage storage;
+  final CardDataModel list;
 
   @override
   State<NewCardForm> createState() => _NewCardFormState();
@@ -99,12 +125,16 @@ class _NewCardFormState extends State<NewCardForm> {
                 height: constraints.maxHeight / 10,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: Colors.black,
-                  gradient: LinearGradient(
-                    colors: [Colors.yellow.shade900, Colors.yellow],
+                  color: Colors.transparent,
+                ),
+                child: const Center(
+                  child: Text(
+                    "Add a new task",
+                    style: TextStyle(
+                      fontSize: 17,
+                    ),
                   ),
                 ),
-                child: const Center(child: Text("Add a new task")),
               ),
             ),
             const Padding(
@@ -138,7 +168,7 @@ class _NewCardFormState extends State<NewCardForm> {
               textAlign: TextAlign.center,
               decoration: InputDecoration(
                 hintText: 'Enter task',
-                hintStyle: const TextStyle(color: Colors.black),
+                hintStyle: const TextStyle(color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(
@@ -147,13 +177,24 @@ class _NewCardFormState extends State<NewCardForm> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(width: 2),
+                  borderSide: const BorderSide(
+                    width: 2,
+                    color: Colors.white,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    width: 2,
+                    color: mainColor,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.only(right: 20),
               ),
             ),
             const SizedBox(height: 20),
             Expanded(
+              // TODO: Give option for time or not
               child: CupertinoDatePicker(
                 initialDateTime: DateTime(DateTime.now().year,
                     DateTime.now().month, DateTime.now().day, 24, 0),
@@ -167,11 +208,7 @@ class _NewCardFormState extends State<NewCardForm> {
             ),
             InkWell(
               onTap: () {
-                /**
-                 * * dropDownValue = importance
-                 * * _controller = text/task
-                 * * timeToAdd = time to add it on
-                 *  */
+                addTodoAndSave(timeToAdd);
 
                 Navigator.of(context).pop();
               },
@@ -190,5 +227,31 @@ class _NewCardFormState extends State<NewCardForm> {
         ),
       );
     });
+  }
+
+  void addTodoAndSave(DateTime timeToAdd) {
+    /**
+     * * dropDownValue = importance
+     * * _controller = text/task
+     * * timeToAdd = time to add it on
+     *  */
+
+    widget.storage.clear();
+    final item = Item(
+      taskId: DateTime.now().microsecondsSinceEpoch.toString(),
+      taskText: _controller.text,
+      completed: false,
+      // time: timeToAdd,
+    );
+
+    print(item);
+
+    if (dropdownValue == 'Important') {
+      widget.list.importantItems.add(item);
+      widget.storage.setItem('important', widget.list.toListImp());
+    } else {
+      widget.list.unimportantItems.add(item);
+      widget.storage.setItem('unimportant', widget.list.toListUnimp());
+    }
   }
 }

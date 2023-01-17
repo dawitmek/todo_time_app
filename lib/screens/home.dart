@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:todo_time_app/constant/vars.dart';
+import 'package:todo_time_app/models/tasks.dart';
 import 'package:todo_time_app/widget/add_button.dart';
 import 'package:todo_time_app/widget/hours.dart';
 import 'package:todo_time_app/widget/time.dart';
 import 'package:todo_time_app/widget/todo.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final LocalStorage storage = LocalStorage(
+    'data${DateTime.now().toString().split(' ')[0]}',
+  );
+  final CardDataModel listData = CardDataModel();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const HomeAppBar(),
+      appBar: HomeAppBar(storage: storage, list: listData),
       body: Container(
         decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -68,92 +80,20 @@ class HomeScreen extends StatelessWidget {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          // TOD: Change to GetX
-                          Navigator.of(context).push(
-                            HeroDialogRoute(
-                                builder: (context) => const Center(
-                                      child: CardModel(
-                                        id: "important",
-                                        cardColor: mainColor,
-                                      ),
-                                    )),
-                          );
-                        },
-                        child: Hero(
-                          tag: "important",
-                          child: Container(
-                            height: 175,
-                            width: (MediaQuery.of(context).size.width / 2) - 10,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: mainColor,
-                            ),
-                            child: Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: ListView.builder(
-                                  itemCount: 5,
-                                  shrinkWrap: false,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return CardDataWidget(
-                                      index: index,
-                                      taskText: "Testing Testing Testing ",
-                                      editingActive: false,
-                                    );
-                                  },
-                                )),
-                          ),
-                        ),
+                      CardWidget(
+                        storage: storage,
+                        cardColorParam: mainColor,
+                        heroTag: "important",
+                        items: listData.importantItems,
                       ),
                       const SizedBox(
                         height: 55,
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          // TOD: Change to GetX
-                          Navigator.of(context).push(
-                            HeroDialogRoute(
-                                builder: (context) => const Center(
-                                      child: CardModel(
-                                        id: "unimportant",
-                                        cardColor: secColor,
-                                      ),
-                                    )),
-                          );
-                        },
-                        child: Hero(
-                          tag: "unimportant",
-                          child: SingleChildScrollView(
-                            child: Container(
-                              height: 175,
-                              width:
-                                  (MediaQuery.of(context).size.width / 2) - 10,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: secColor,
-                              ),
-                              child: SizedBox(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: ListView.builder(
-                                    itemCount: 5,
-                                    shrinkWrap: true,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return CardDataWidget(
-                                        index: index,
-                                        taskText: "Testing",
-                                        editingActive: false,
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                      CardWidget(
+                        storage: storage,
+                        cardColorParam: secColor,
+                        heroTag: "unimportant",
+                        items: listData.unimportantItems,
                       ),
                     ],
                   ),
@@ -226,6 +166,81 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+// ignore: slash_for_doc_comments
+/**
+ * TODO: Change the widget to handle actual storage data
+ * 
+ * * Params to handle / differences between cards:
+ * * Color [cardColor]
+ * * Item ItemData]
+ */
+
+class CardWidget extends StatelessWidget {
+  const CardWidget({
+    Key? key,
+    required this.storage,
+    required this.cardColorParam,
+    required this.heroTag,
+    required this.items,
+  }) : super(key: key);
+
+  final LocalStorage storage;
+  final Color cardColorParam;
+  final String heroTag;
+  final List<Item> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // TOD: Change to GetX
+        Navigator.of(context).push(
+          HeroDialogRoute(
+              builder: (context) => Center(
+                    child: CardModel(
+                      id: heroTag,
+                      cardColor: cardColorParam,
+                      localDatabase: storage,
+                    ),
+                  )),
+        );
+      },
+      child: Hero(
+        tag: heroTag,
+        child: Container(
+          height: 175,
+          width: (MediaQuery.of(context).size.width / 2) - 10,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: cardColorParam,
+          ),
+          child: FutureBuilder(
+              future: storage.ready,
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.data == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: ListView.builder(
+                      itemCount: 5,
+                      shrinkWrap: false,
+                      itemBuilder: (BuildContext context, int index) {
+                        return CardDataWidget(
+                          index: index,
+                          taskText: "Testing Testing Testing ",
+                          editingActive: false,
+                          completed: false,
+                        );
+                      },
+                    ));
+              }),
+        ),
+      ),
+    );
+  }
+}
+
 class HomeNavigationBar extends StatelessWidget {
   const HomeNavigationBar({
     Key? key,
@@ -254,8 +269,13 @@ class HomeNavigationBar extends StatelessWidget {
 
 class HomeAppBar extends StatelessWidget with PreferredSizeWidget {
   const HomeAppBar({
+    required this.list,
     Key? key,
+    required this.storage,
   }) : super(key: key);
+
+  final LocalStorage storage;
+  final CardDataModel list;
 
   @override
   Widget build(BuildContext context) {
@@ -277,8 +297,8 @@ class HomeAppBar extends StatelessWidget with PreferredSizeWidget {
         onTap: () {
           Navigator.of(context).push(
             HeroDialogRoute(
-              builder: ((context) => const Center(
-                    child: AddNewCardButton(),
+              builder: ((context) => Center(
+                    child: AddNewCardButton(storage: storage, list: list),
                   )),
             ),
           );

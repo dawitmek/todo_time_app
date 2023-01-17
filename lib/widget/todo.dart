@@ -1,58 +1,84 @@
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 
-class CardModel extends StatelessWidget {
-  const CardModel({required this.id, required this.cardColor, super.key});
+class CardModel extends StatefulWidget {
+  const CardModel(
+      {required this.id,
+      required this.cardColor,
+      required this.localDatabase,
+      super.key});
 
   final String id;
 
   final Color cardColor;
 
+  final LocalStorage localDatabase;
+
+  @override
+  State<CardModel> createState() => _CardModelState();
+}
+
+class _CardModelState extends State<CardModel> {
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: id,
-      child: Material(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.black38,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(0.0),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 1.3,
-                    height: MediaQuery.of(context).size.height / 1.5,
-                    child: Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: ListView.builder(
-                        itemCount: 24,
-                        shrinkWrap: true,
-                        itemBuilder: (BuildContext context, int index) {
-                          return CardDataWidget(
-                            index: index,
-                            taskText: "Testing Testing Testing Testing ",
-                            editingActive: true,
-                          );
-                        },
-                      ),
+    return FutureBuilder(
+        future: widget.localDatabase.ready,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.data == null) {
+            return Hero(
+              tag: widget.id,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+          return Hero(
+            tag: widget.id,
+            child: SafeArea(
+              child: Material(
+                type: MaterialType.card,
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.black38,
+                child: Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 1.3,
+                          height: MediaQuery.of(context).size.height / 1.5,
+                          child: Container(
+                            margin: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: widget.cardColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: ListView.builder(
+                              itemCount: 24,
+                              shrinkWrap: true,
+                              itemBuilder: (BuildContext context, int index) {
+                                return CardDataWidget(
+                                  index: index,
+                                  taskText: "TESTING 1 TESTING 1 TESTING 1 ",
+                                  editingActive: true,
+                                  completed: true,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
+          );
+        });
   }
 }
 
@@ -62,18 +88,19 @@ class CardDataWidget extends StatefulWidget {
     required this.index,
     required this.taskText,
     required this.editingActive,
+    required this.completed,
   }) : super(key: key);
 
   final int index;
   final String taskText;
   final bool editingActive;
+  final bool completed;
 
   @override
   State<CardDataWidget> createState() => _CardDataWidgetState();
 }
 
 class _CardDataWidgetState extends State<CardDataWidget> {
-  
   bool isReadOnly = true;
 
   late TextEditingController _controller;
@@ -97,11 +124,11 @@ class _CardDataWidgetState extends State<CardDataWidget> {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: const TextStyle(),
-      child: SingleChildScrollView(
-        child: Material(
-          color: Colors.transparent,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
+      child: Material(
+        color: Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SingleChildScrollView(
             child: Row(
               children: [
                 Text("${widget.index + 1}. "),
@@ -111,7 +138,7 @@ class _CardDataWidgetState extends State<CardDataWidget> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(
-                        height: 34,
+                        // height: 34,
                         child: TextField(
                           readOnly: isReadOnly,
                           textAlign: TextAlign.start,
@@ -119,16 +146,20 @@ class _CardDataWidgetState extends State<CardDataWidget> {
                           focusNode: _textFieldFocus,
                           decoration: InputDecoration(
                             hintText: widget.taskText,
-                            // hintMaxLines: maxLinesText(),
-                            contentPadding: const EdgeInsets.all(15),
+                            // TODO: Change Max Lines to Dynamic
+                            hintMaxLines: 2,
+                            contentPadding: const EdgeInsets.all(0),
                             hintStyle: const TextStyle(
                               overflow: TextOverflow.ellipsis,
-                              fontSize: 16,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
                             ),
                             focusedBorder: const UnderlineInputBorder(
                               borderSide: BorderSide(color: Colors.black),
                             ),
                           ),
+                          onTap: () {},
                         ),
                       ),
                     ],
@@ -151,27 +182,29 @@ class _CardDataWidgetState extends State<CardDataWidget> {
   }
 
   Widget buttonsFunction(bool canEdit) {
-    
     if (canEdit) {
-      return Expanded(
-        flex: 1,
-        child: Row(
-          children: [
-            const CheckBoxWidget(),
-            InkWell(
-              onTap: () {
-                // _textFieldFocus.requestFocus();
-                setState(() {
-                  isReadOnly = !isReadOnly;
-                });
-              },
-              child: const Icon(
-                Icons.edit_note,
-                color: Colors.amber,
-              ),
-            )
-          ],
-        ),
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          CheckBoxWidget(completed: widget.completed),
+          InkWell(
+            customBorder: const CircleBorder(),
+            onTap: () {
+              setState(() {
+                _controller.text.isEmpty
+                    ? _controller.text = widget.taskText
+                    : _controller.text = '';
+
+                _textFieldFocus.requestFocus();
+                isReadOnly = !isReadOnly;
+              });
+            },
+            child: Icon(
+              Icons.edit_note,
+              color: !isReadOnly ? Colors.lightBlue : null,
+            ),
+          )
+        ],
       );
     } else {
       return Row();
@@ -180,20 +213,20 @@ class _CardDataWidgetState extends State<CardDataWidget> {
 }
 
 class CheckBoxWidget extends StatefulWidget {
-  const CheckBoxWidget({
+  CheckBoxWidget({
     Key? key,
+    required this.completed,
   }) : super(key: key);
 
+  bool completed;
   @override
   State<CheckBoxWidget> createState() => _CheckBoxWidgetState();
 }
 
 class _CheckBoxWidgetState extends State<CheckBoxWidget> {
-  bool _completed = false;
   @override
   void initState() {
     super.initState();
-    _completed = false;
   }
 
   @override
@@ -206,12 +239,12 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
     // TODO: Change shape
 
     return Checkbox(
-      value: _completed,
+      value: widget.completed,
       shape: const CircleBorder(),
       activeColor: Colors.green,
       onChanged: (bool? clicked) {
         setState(() {
-          _completed = clicked!;
+          widget.completed = clicked!;
         });
       },
     );
