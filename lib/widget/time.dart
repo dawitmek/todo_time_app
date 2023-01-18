@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:todo_time_app/constant/vars.dart';
+import 'package:todo_time_app/models/tasks.dart';
 import 'package:todo_time_app/widget/hours.dart';
 
 class TimeModel extends StatelessWidget {
-  const TimeModel({required this.id, required this.timeColor, super.key});
+  TimeModel({
+    required this.id,
+    required this.timeColor,
+    required this.timeItems,
+    super.key,
+  });
 
   final String id;
-
   final Color timeColor;
+  List<Item?> timeItems;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +41,7 @@ class TimeModel extends StatelessWidget {
                       shrinkWrap: true,
                       itemBuilder: (BuildContext context, int index) {
                         return HourWidget(
-                          task: "RIGHT",
+                          items: timeItems,
                           hour: index,
                           txtBgColor: timeColor,
                         );

@@ -12,6 +12,11 @@ class CardDataModel {
   toListUnimp() {
     return unimportantItems.map((singleItem) => singleItem.toJson()).toList();
   }
+
+  void clear() {
+    importantItems.clear();
+    unimportantItems.clear();
+  }
 }
 
 class Item {
@@ -19,25 +24,20 @@ class Item {
     required this.taskId,
     required this.taskText,
     required this.completed,
-    this.priority,
     this.time,
   });
 
   final String taskId;
 
-  final String taskText;
-
-  final int? priority;
-
   final DateTime? time;
 
+  String taskText;
   bool completed;
 
   toJson() {
     Map<String, dynamic> itemData = {};
     itemData["taskId"] = taskId;
     itemData["taskText"] = taskText;
-    itemData["priority"] = priority;
     itemData["completed"] = completed;
     itemData["time"] = time.toString();
 

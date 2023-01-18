@@ -16,12 +16,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final LocalStorage storage = LocalStorage(
-    'data${DateTime.now().toString().split(' ')[0]}',
+    'data${DateTime.now().day.toString()}',
   );
   final CardDataModel listData = CardDataModel();
+  bool initialized = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    List<Item> impTimeItems = [...listData.importantItems];
+    List<Item> unimpTimeItems = [...listData.importantItems];
+
+    impTimeItems.removeWhere((element) {
+      return element.time == null;
+    });
+    unimpTimeItems.removeWhere((element) {
+      return element.time == null;
+    });
+    List<Item?> allTimeItems = [...impTimeItems, ...unimpTimeItems];
+
     return Scaffold(
       appBar: HomeAppBar(storage: storage, list: listData),
       body: Container(
@@ -74,88 +92,135 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            Expanded(
-              child: Row(
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+            FutureBuilder(
+              future: storage.ready,
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                listData.importantItems;
+
+                if (snapshot.data == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!initialized) {
+                  var impItems = storage.getItem('important');
+                  var unimpItems = storage.getItem('unimportant');
+
+                  if (impItems != null) {
+                    listData.importantItems = List<Item>.from(
+                      (impItems as List).map(
+                        (item) => Item(
+                          taskId: item['taskId'],
+                          taskText: item['taskText'],
+                          completed: item['completed'],
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (unimpItems != null) {
+                    listData.unimportantItems = List<Item>.from(
+                      (unimpItems as List).map(
+                        (item) => Item(
+                          taskId: item['taskId'],
+                          taskText: item['taskText'],
+                          completed: item['completed'],
+                        ),
+                      ),
+                    );
+                  }
+                  initialized = true;
+                }
+
+                return Expanded(
+                  child: Row(
                     children: [
-                      CardWidget(
-                        storage: storage,
-                        cardColorParam: mainColor,
-                        heroTag: "important",
-                        items: listData.importantItems,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CardWidget(
+                            storage: storage,
+                            cardColorParam: mainColor,
+                            heroTag: "important",
+                            items: listData.importantItems,
+                            list: listData,
+                          ),
+                          const SizedBox(
+                            height: 55,
+                          ),
+                          CardWidget(
+                            storage: storage,
+                            cardColorParam: secColor,
+                            heroTag: "unimportant",
+                            items: listData.unimportantItems,
+                            list: listData,
+                          ),
+                        ],
                       ),
                       const SizedBox(
-                        height: 55,
+                        width: 10,
                       ),
-                      CardWidget(
-                        storage: storage,
-                        cardColorParam: secColor,
-                        heroTag: "unimportant",
-                        items: listData.unimportantItems,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // TOD: Change to GetX
-                      Navigator.of(context).push(
-                        HeroDialogRoute(
-                            builder: (context) => const Center(
-                                  child: TimeModel(
-                                    id: "time",
-                                    timeColor: terColor,
-                                  ),
-                                )),
-                      );
-                    },
-                    child: SingleChildScrollView(
-                      child: SafeArea(
-                        child: Hero(
-                          tag: "time",
-                          child: SingleChildScrollView(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Container(
-                                  alignment: Alignment.centerRight,
-                                  height:
-                                      (MediaQuery.of(context).size.height) / 2,
-                                  width:
-                                      (MediaQuery.of(context).size.width / 2) -
-                                          10,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    color: terColor,
-                                  ),
-                                  child: SizedBox(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: ListView.builder(
-                                        itemCount: 24,
-                                        shrinkWrap: true,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return HourWidget(
-                                            task: "TEST",
-                                            hour: index,
-                                            txtBgColor: terColor,
-                                          );
-                                        },
+                      GestureDetector(
+                        onTap: () {
+                          // TOD: Change to GetX
+                          Navigator.of(context).push(
+                            HeroDialogRoute(
+                                builder: (context) => Center(
+                                      child: TimeModel(
+                                        id: "time",
+                                        timeColor: terColor,
+                                        timeItems: allTimeItems,
                                       ),
-                                    ),
-                                  )),
+                                    )),
+                          );
+                        },
+                        child: SingleChildScrollView(
+                          child: SafeArea(
+                            child: Hero(
+                              tag: "time",
+                              child: SingleChildScrollView(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Container(
+                                      alignment: Alignment.centerRight,
+                                      height:
+                                          (MediaQuery.of(context).size.height) /
+                                              2,
+                                      width:
+                                          (MediaQuery.of(context).size.width /
+                                                  2) -
+                                              10,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        color: terColor,
+                                      ),
+                                      child: SizedBox(
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 8.0),
+                                          child: ListView.builder(
+                                            itemCount: 24,
+                                            shrinkWrap: true,
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              return HourWidget(
+                                                items: allTimeItems,
+                                                hour: index,
+                                                txtBgColor: terColor,
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      )),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
+                      )
+                    ],
+                  ),
+                );
+              },
             )
           ],
         ),
@@ -182,12 +247,14 @@ class CardWidget extends StatelessWidget {
     required this.cardColorParam,
     required this.heroTag,
     required this.items,
+    required this.list,
   }) : super(key: key);
 
   final LocalStorage storage;
   final Color cardColorParam;
   final String heroTag;
   final List<Item> items;
+  final CardDataModel list;
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +267,9 @@ class CardWidget extends StatelessWidget {
                     child: CardModel(
                       id: heroTag,
                       cardColor: cardColorParam,
-                      localDatabase: storage,
+                      items: items,
+                      storage: storage,
+                      list: list,
                     ),
                   )),
         );
@@ -221,19 +290,36 @@ class CardWidget extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 return Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: ListView.builder(
-                      itemCount: 5,
-                      shrinkWrap: false,
-                      itemBuilder: (BuildContext context, int index) {
-                        return CardDataWidget(
-                          index: index,
-                          taskText: "Testing Testing Testing ",
-                          editingActive: false,
-                          completed: false,
-                        );
-                      },
-                    ));
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: (() {
+                    if (items.isNotEmpty) {
+                      ListView.builder(
+                        itemCount: items.length,
+                        shrinkWrap: false,
+                        itemBuilder: (BuildContext context, int index) {
+                          return CardDataWidget(
+                            index: index,
+                            editingActive: false,
+                            items: items,
+                            storage: storage,
+                            id: heroTag,
+                            list: list,
+                          );
+                        },
+                      );
+                    } else {
+                      return const Center(
+                        child: DefaultTextStyle(
+                          style: TextStyle(fontSize: 16),
+                          child: Text(
+                            'There are no tasks yet.\nAdd a task!',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      );
+                    }
+                  }()),
+                );
               }),
         ),
       ),
@@ -305,11 +391,48 @@ class HomeAppBar extends StatelessWidget with PreferredSizeWidget {
         },
       ),
       actions: [
-        Container(
-            margin: const EdgeInsets.only(right: 20),
-            child: CircleAvatar(
-              backgroundColor: Colors.orange.shade600,
-            ))
+        InkWell(
+          onTap: () {
+            showDialog<void>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text(
+                    'Warning!',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  content: const Text(
+                      '''You're about to delete all your tasks!\n\nAre you sure you want to proceed?'''),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        storage.clear();
+                        list.clear();
+                        Navigator.of(context).pop();
+                        Navigator.of(context).popAndPushNamed('/home');
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
+                  backgroundColor: Colors.black,
+                );
+              },
+            );
+          },
+          child: ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Colors.red, Colors.yellow],
+            ).createShader(bounds),
+            child: const Icon(
+              Icons.delete,
+              size: 40,
+            ),
+          ),
+        )
       ],
       flexibleSpace: Container(
         decoration: const BoxDecoration(

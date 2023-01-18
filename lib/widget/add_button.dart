@@ -45,7 +45,7 @@ class AddNewCardButton extends StatelessWidget {
                     ),
                     SizedBox(
                       width: MediaQuery.of(context).size.width / 1.2,
-                      height: MediaQuery.of(context).size.height / 2,
+                      height: MediaQuery.of(context).size.height / 1.8,
                       child: Container(
                         margin: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -93,6 +93,7 @@ class _NewCardFormState extends State<NewCardForm> {
 
   List<String> dropDownList = ["Important", "Unimportant"];
   String? dropdownValue;
+  bool addATime = false;
 
   @override
   void initState() {
@@ -193,34 +194,63 @@ class _NewCardFormState extends State<NewCardForm> {
               ),
             ),
             const SizedBox(height: 20),
-            Expanded(
-              // TODO: Give option for time or not
-              child: CupertinoDatePicker(
-                initialDateTime: DateTime(DateTime.now().year,
-                    DateTime.now().month, DateTime.now().day, 24, 0),
-                mode: CupertinoDatePickerMode.time,
-                use24hFormat: false,
-                minuteInterval: 30,
-                onDateTimeChanged: (DateTime newTime) {
-                  timeToAdd = newTime;
-                },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Do you want to add time?'),
+                  Switch(
+                    value: addATime,
+                    activeColor: mainColor,
+                    onChanged: (bool val) {
+                      setState(() {});
+                      addATime = val;
+                    },
+                  )
+                ],
               ),
             ),
-            InkWell(
-              onTap: () {
-                addTodoAndSave(timeToAdd);
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  (() {
+                    if (addATime) {
+                      return Expanded(
+                          child: CupertinoDatePicker(
+                        initialDateTime: DateTime(DateTime.now().year,
+                            DateTime.now().month, DateTime.now().day, 24, 0),
+                        mode: CupertinoDatePickerMode.time,
+                        use24hFormat: false,
+                        minuteInterval: 30,
+                        onDateTimeChanged: (DateTime newTime) {
+                          timeToAdd = newTime;
+                        },
+                      ));
+                    } else {
+                      return Container();
+                    }
+                  }()),
+                  InkWell(
+                    onTap: () {
+                      dynamic val = !addATime ? null : timeToAdd;
+                      addTodoAndSave(val);
 
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                width: constraints.maxWidth,
-                height: 30,
-                margin: const EdgeInsets.only(top: 20),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(child: Text("Add New Task")),
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      width: constraints.maxWidth,
+                      height: 30,
+                      margin: const EdgeInsets.only(top: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(child: Text("Add New Task")),
+                    ),
+                  ),
+                ],
               ),
             )
           ],
@@ -229,29 +259,30 @@ class _NewCardFormState extends State<NewCardForm> {
     });
   }
 
-  void addTodoAndSave(DateTime timeToAdd) {
+  void addTodoAndSave(DateTime? timeToAdd) async {
     /**
      * * dropDownValue = importance
      * * _controller = text/task
      * * timeToAdd = time to add it on
      *  */
 
-    widget.storage.clear();
     final item = Item(
       taskId: DateTime.now().microsecondsSinceEpoch.toString(),
       taskText: _controller.text,
       completed: false,
-      // time: timeToAdd,
+      time: timeToAdd,
     );
-
-    print(item);
 
     if (dropdownValue == 'Important') {
       widget.list.importantItems.add(item);
-      widget.storage.setItem('important', widget.list.toListImp());
+      await widget.storage.setItem('important', widget.list.toListImp());
     } else {
       widget.list.unimportantItems.add(item);
-      widget.storage.setItem('unimportant', widget.list.toListUnimp());
+      await widget.storage.setItem('unimportant', widget.list.toListUnimp());
     }
+
+    // * For seeing the values
+    // JsonEncoder encoder = const JsonEncoder.withIndent(' ');
+    // print(encoder.convert(widget.storage.getItem('important')));
   }
 }

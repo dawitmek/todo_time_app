@@ -1,18 +1,23 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:todo_time_app/models/tasks.dart';
 
 class CardModel extends StatefulWidget {
   const CardModel(
       {required this.id,
       required this.cardColor,
-      required this.localDatabase,
+      required this.items,
+      required this.storage,
+      required this.list,
       super.key});
 
   final String id;
-
   final Color cardColor;
-
-  final LocalStorage localDatabase;
+  final List<Item> items;
+  final LocalStorage storage;
+  final CardDataModel list;
 
   @override
   State<CardModel> createState() => _CardModelState();
@@ -21,64 +26,69 @@ class CardModel extends StatefulWidget {
 class _CardModelState extends State<CardModel> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: widget.localDatabase.ready,
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.data == null) {
-            return Hero(
-              tag: widget.id,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-          return Hero(
-            tag: widget.id,
-            child: SafeArea(
-              child: Material(
-                type: MaterialType.card,
-                borderRadius: BorderRadius.circular(16),
-                color: Colors.black38,
-                child: Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width / 1.3,
-                          height: MediaQuery.of(context).size.height / 1.5,
-                          child: Container(
-                            margin: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: widget.cardColor,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: ListView.builder(
-                              itemCount: 24,
-                              shrinkWrap: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                return CardDataWidget(
-                                  index: index,
-                                  taskText: "TESTING 1 TESTING 1 TESTING 1 ",
-                                  editingActive: true,
-                                  completed: true,
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+    return Hero(
+      tag: widget.id,
+      child: SafeArea(
+        child: Material(
+          type: MaterialType.card,
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.black38,
+          child: Padding(
+            padding: const EdgeInsets.all(0.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width / 1.3,
+                    height: MediaQuery.of(context).size.height / 1.5,
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: widget.cardColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: checkIfValuesExist(widget.items),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // * Returns a list if there are values. if no values => returns text
+  Widget checkIfValuesExist(List<Item> itemList) {
+    if (itemList.isNotEmpty) {
+      return ListView.builder(
+        itemCount: widget.items.length,
+        shrinkWrap: true,
+        itemBuilder: (BuildContext context, int index) {
+          return CardDataWidget(
+            index: index,
+            editingActive: true,
+            storage: widget.storage,
+            items: widget.items,
+            id: widget.id,
+            list: widget.list,
           );
-        });
+        },
+      );
+    } else {
+      return const Center(
+        child: Text(
+          'There are no tasks yet.\nAdd a task!',
+          style: TextStyle(fontSize: 20),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
   }
 }
 
@@ -86,15 +96,19 @@ class CardDataWidget extends StatefulWidget {
   const CardDataWidget({
     Key? key,
     required this.index,
-    required this.taskText,
     required this.editingActive,
-    required this.completed,
+    required this.storage,
+    required this.items,
+    required this.id,
+    required this.list,
   }) : super(key: key);
 
   final int index;
-  final String taskText;
   final bool editingActive;
-  final bool completed;
+  final LocalStorage storage;
+  final List<Item> items;
+  final String id;
+  final CardDataModel list;
 
   @override
   State<CardDataWidget> createState() => _CardDataWidgetState();
@@ -122,12 +136,16 @@ class _CardDataWidgetState extends State<CardDataWidget> {
 
   @override
   Widget build(BuildContext context) {
+    Item currItem = widget.items.elementAt(widget.index);
+    // JsonEncoder encoder = const JsonEncoder.withIndent(' ');
+    // print(encoder.convert(widget.storage.getItem('important')));
+
     return DefaultTextStyle(
       style: const TextStyle(),
       child: Material(
         color: Colors.transparent,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: SingleChildScrollView(
             child: Row(
               children: [
@@ -145,7 +163,8 @@ class _CardDataWidgetState extends State<CardDataWidget> {
                           controller: _controller,
                           focusNode: _textFieldFocus,
                           decoration: InputDecoration(
-                            hintText: widget.taskText,
+                            hintText:
+                                widget.items.elementAt(widget.index).taskText,
                             // TODO: Change Max Lines to Dynamic
                             hintMaxLines: 2,
                             contentPadding: const EdgeInsets.all(0),
@@ -159,13 +178,20 @@ class _CardDataWidgetState extends State<CardDataWidget> {
                               borderSide: BorderSide(color: Colors.black),
                             ),
                           ),
-                          onTap: () {},
+                          onSubmitted: (value) {
+                            currItem.taskText = value;
+                            setState(() {
+                              saveToStorage(widget.id);
+                            });
+                          },
                         ),
                       ),
                     ],
                   ),
                 ),
-                buttonsFunction(widget.editingActive),
+                // * Shows buttons for the hero screen and not for the
+                // * normal card widget
+                taskWidgets(widget.editingActive, currItem),
               ],
             ),
           ),
@@ -174,25 +200,28 @@ class _CardDataWidgetState extends State<CardDataWidget> {
     );
   }
 
-  int maxLinesText() {
-    if (!widget.editingActive) {
-      return 2;
-    }
-    return 12;
-  }
-
-  Widget buttonsFunction(bool canEdit) {
+  Widget taskWidgets(bool canEdit, Item currItem) {
     if (canEdit) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          CheckBoxWidget(completed: widget.completed),
+          Checkbox(
+            value: currItem.completed,
+            shape: const CircleBorder(),
+            activeColor: Colors.green,
+            onChanged: (bool? clicked) {
+              setState(() {
+                currItem.completed = clicked!;
+                saveToStorage(widget.id);
+              });
+            },
+          ),
           InkWell(
             customBorder: const CircleBorder(),
             onTap: () {
               setState(() {
                 _controller.text.isEmpty
-                    ? _controller.text = widget.taskText
+                    ? _controller.text = currItem.taskText
                     : _controller.text = '';
 
                 _textFieldFocus.requestFocus();
@@ -210,43 +239,16 @@ class _CardDataWidgetState extends State<CardDataWidget> {
       return Row();
     }
   }
-}
 
-class CheckBoxWidget extends StatefulWidget {
-  CheckBoxWidget({
-    Key? key,
-    required this.completed,
-  }) : super(key: key);
-
-  bool completed;
-  @override
-  State<CheckBoxWidget> createState() => _CheckBoxWidgetState();
-}
-
-class _CheckBoxWidgetState extends State<CheckBoxWidget> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: Change shape
-
-    return Checkbox(
-      value: widget.completed,
-      shape: const CircleBorder(),
-      activeColor: Colors.green,
-      onChanged: (bool? clicked) {
-        setState(() {
-          widget.completed = clicked!;
-        });
-      },
-    );
+  void saveToStorage(String key) {
+    switch (key) {
+      case "important":
+        widget.storage.setItem(key, widget.list.toListImp());
+        break;
+      case "unimportant":
+        widget.storage.setItem(key, widget.list.toListUnimp());
+        break;
+      default:
+    }
   }
 }
