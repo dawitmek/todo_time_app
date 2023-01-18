@@ -200,6 +200,7 @@ class _CardDataWidgetState extends State<CardDataWidget> {
     );
   }
 
+  // TODO: Add delete button
   Widget taskWidgets(bool canEdit, Item currItem) {
     if (canEdit) {
       return Row(

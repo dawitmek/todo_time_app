@@ -22,12 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool initialized = false;
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     List<Item> impTimeItems = [...listData.importantItems];
     List<Item> unimpTimeItems = [...listData.importantItems];
@@ -78,6 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
+
+                  // TODO: Give on tap function
+
                   const Expanded(
                     flex: 1,
                     child: Center(
@@ -233,7 +230,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // ignore: slash_for_doc_comments
 /**
- * TODO: Change the widget to handle actual storage data
  * 
  * * Params to handle / differences between cards:
  * * Color [cardColor]
@@ -327,6 +323,7 @@ class CardWidget extends StatelessWidget {
   }
 }
 
+// TODO: Add pages and functions
 class HomeNavigationBar extends StatelessWidget {
   const HomeNavigationBar({
     Key? key,
