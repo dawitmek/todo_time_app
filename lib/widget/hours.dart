@@ -15,6 +15,8 @@ class HourWidget extends StatelessWidget {
   final Color txtBgColor;
   final List<Item?> items;
 
+  // TODO: Refrator usability and effeciency
+
   @override
   Widget build(BuildContext context) {
     dayTime = hour >= 12 ? false : true;

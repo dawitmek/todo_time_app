@@ -19,6 +19,7 @@ class AddNewCardButton extends StatelessWidget {
   Widget build(BuildContext context) {
     FocusScopeNode currentFocus = FocusScope.of(context);
 
+    // TODO: Fix RenderFlex error
     return SafeArea(
       child: CupertinoPageScaffold(
         backgroundColor: Colors.transparent,
