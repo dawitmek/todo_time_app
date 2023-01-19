@@ -277,7 +277,8 @@ class _NewCardFormState extends State<NewCardForm> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('There is already a task with that time.'),
+            title: const Text('There is already a task with that time.',
+                style: TextStyle(color: Colors.black)),
             content: const Text('Please switch to another time.'),
             contentTextStyle: const TextStyle(color: Colors.black),
             actions: [

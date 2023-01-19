@@ -18,6 +18,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final LocalStorage storage = LocalStorage(
     'data${DateTime.now().day.toString()}',
   );
+  final LocalStorage nameStorage = LocalStorage(
+    'name',
+  );
   final CardDataModel listData = CardDataModel();
   bool initialized = false;
   late TextEditingController _nameEdit;
@@ -48,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     List<Item?> allTimeItems = [...impTimeItems, ...unimpTimeItems];
 
-    dynamic userName = storage.getItem('username');
+    dynamic userName = nameStorage.getItem('username');
 
     return Scaffold(
       appBar: HomeAppBar(storage: storage, list: listData),
@@ -110,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           )),
                                       controller: _nameEdit,
                                       onSubmitted: (newName) {
-                                        storage.setItem('username', newName);
+                                        nameStorage.setItem('username', newName);
                                         _nameEdit.clear();
                                         Navigator.of(context).pop();
                                       },

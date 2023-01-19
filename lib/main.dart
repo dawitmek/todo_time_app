@@ -16,7 +16,8 @@ class Main extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
         const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
-    LocalStorage storage = LocalStorage('data${DateTime.now().day.toString()}');
+    LocalStorage storage =
+        LocalStorage('name');
 
     return GetMaterialApp(
       title: "Todo App",

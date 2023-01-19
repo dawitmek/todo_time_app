@@ -11,7 +11,7 @@ class FirstScreen extends StatefulWidget {
 }
 
 class _FirstScreenState extends State<FirstScreen> {
-  LocalStorage storage = LocalStorage('data${DateTime.now().day.toString()}');
+  LocalStorage storage = LocalStorage('name');
   late TextEditingController _controller;
   late final FocusNode _focus = FocusNode();
 
