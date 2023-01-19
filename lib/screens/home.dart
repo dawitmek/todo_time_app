@@ -20,6 +20,20 @@ class _HomeScreenState extends State<HomeScreen> {
   );
   final CardDataModel listData = CardDataModel();
   bool initialized = false;
+  late TextEditingController _nameEdit;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameEdit = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameEdit.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +47,8 @@ class _HomeScreenState extends State<HomeScreen> {
       return element.time == null;
     });
     List<Item?> allTimeItems = [...impTimeItems, ...unimpTimeItems];
+
+    dynamic userName = storage.getItem('username');
 
     return Scaffold(
       appBar: HomeAppBar(storage: storage, list: listData),
@@ -56,30 +72,51 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children: [
                         Text(
-                          "Hello David",
-                          style: TextStyle(
+                          "Hello $userName",
+                          style: const TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 10),
-                        Text("What are we doing today?",
+                        const SizedBox(height: 10),
+                        const Text("What are we doing today?",
                             style: TextStyle(
                               fontSize: 18,
                             )),
                       ],
                     ),
                   ),
-
-                  // TODO: Give on tap function
-
-                  const Expanded(
+                  Expanded(
                     flex: 1,
                     child: Center(
                         child: InkWell(
-                      child: Icon(
+                      onTap: () => showDialog(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                                  backgroundColor: Colors.black,
+                                  actions: [
+                                    TextField(
+                                      autofocus: true,
+                                      decoration: const InputDecoration(
+                                          focusedBorder: UnderlineInputBorder(
+                                            borderSide:
+                                                BorderSide(color: terColor),
+                                          ),
+                                          label: Text(
+                                            'Enter your new name',
+                                            style: TextStyle(color: mainColor),
+                                          )),
+                                      controller: _nameEdit,
+                                      onSubmitted: (newName) {
+                                        storage.setItem('username', newName);
+                                        _nameEdit.clear();
+                                        Navigator.of(context).pop();
+                                      },
+                                    )
+                                  ])),
+                      child: const Icon(
                         Icons.edit,
                         color: Colors.white,
                         size: 18,
@@ -289,7 +326,7 @@ class CardWidget extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: (() {
                     if (items.isNotEmpty) {
-                      ListView.builder(
+                      return ListView.builder(
                         itemCount: items.length,
                         shrinkWrap: false,
                         itemBuilder: (BuildContext context, int index) {
@@ -362,6 +399,16 @@ class HomeAppBar extends StatelessWidget with PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<Item> impTimeItems = [...list.importantItems];
+    List<Item> unimpTimeItems = [...list.importantItems];
+
+    impTimeItems.removeWhere((element) {
+      return element.time == null;
+    });
+    unimpTimeItems.removeWhere((element) {
+      return element.time == null;
+    });
+    List<Item?> allTimeItems = [...impTimeItems, ...unimpTimeItems];
     return AppBar(
       backgroundColor: Colors.transparent,
       leading: GestureDetector(
@@ -381,7 +428,11 @@ class HomeAppBar extends StatelessWidget with PreferredSizeWidget {
           Navigator.of(context).push(
             HeroDialogRoute(
               builder: ((context) => Center(
-                    child: AddNewCardButton(storage: storage, list: list),
+                    child: AddNewCardButton(
+                      storage: storage,
+                      list: list,
+                      timeItems: allTimeItems,
+                    ),
                   )),
             ),
           );

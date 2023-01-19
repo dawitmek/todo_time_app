@@ -137,8 +137,6 @@ class _CardDataWidgetState extends State<CardDataWidget> {
   @override
   Widget build(BuildContext context) {
     Item currItem = widget.items.elementAt(widget.index);
-    // JsonEncoder encoder = const JsonEncoder.withIndent(' ');
-    // print(encoder.convert(widget.storage.getItem('important')));
 
     return DefaultTextStyle(
       style: const TextStyle(),

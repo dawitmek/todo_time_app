@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_time_app/constant/vars.dart';
 import 'package:todo_time_app/models/tasks.dart';
 
@@ -9,11 +8,13 @@ class AddNewCardButton extends StatelessWidget {
   const AddNewCardButton({
     required this.storage,
     required this.list,
+    required this.timeItems,
     super.key,
   });
 
   final LocalStorage storage;
   final CardDataModel list;
+  final List<Item?> timeItems;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +61,11 @@ class AddNewCardButton extends StatelessWidget {
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: NewCardForm(storage: storage, list: list),
+                        child: NewCardForm(
+                          storage: storage,
+                          list: list,
+                          timeItems: timeItems,
+                        ),
                       ),
                     ),
                   ],
@@ -78,11 +83,13 @@ class NewCardForm extends StatefulWidget {
   const NewCardForm({
     required this.storage,
     required this.list,
+    required this.timeItems,
     super.key,
   });
 
   final LocalStorage storage;
   final CardDataModel list;
+  final List<Item?> timeItems;
 
   @override
   State<NewCardForm> createState() => _NewCardFormState();
@@ -90,7 +97,6 @@ class NewCardForm extends StatefulWidget {
 
 class _NewCardFormState extends State<NewCardForm> {
   late TextEditingController _controller;
-  final prefs = SharedPreferences.getInstance();
 
   List<String> dropDownList = ["Important", "Unimportant"];
   String? dropdownValue;
@@ -235,10 +241,16 @@ class _NewCardFormState extends State<NewCardForm> {
                   }()),
                   InkWell(
                     onTap: () {
-                      dynamic val = !addATime ? null : timeToAdd;
-                      addTodoAndSave(val);
-
-                      Navigator.of(context).pop();
+                      DateTime? val = !addATime ? null : timeToAdd;
+                      bool found = false;
+                      for (var item in widget.timeItems) {
+                        if (item?.time?.compareTo(val!) == 0) {
+                          found = true;
+                        }
+                      }
+                      !found
+                          ? addTodoAndSave(val, context)
+                          : timeErrorDialogue(context);
                     },
                     child: Container(
                       width: constraints.maxWidth,
@@ -260,7 +272,25 @@ class _NewCardFormState extends State<NewCardForm> {
     });
   }
 
-  void addTodoAndSave(DateTime? timeToAdd) async {
+  Future<void> timeErrorDialogue(BuildContext context) {
+    return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('There is already a task with that time.'),
+            content: const Text('Please switch to another time.'),
+            contentTextStyle: const TextStyle(color: Colors.black),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK', style: TextStyle(color: mainColor)),
+              )
+            ],
+          );
+        });
+  }
+
+  void addTodoAndSave(DateTime? timeToAdd, BuildContext context) {
     /**
      * * dropDownValue = importance
      * * _controller = text/task
@@ -276,14 +306,11 @@ class _NewCardFormState extends State<NewCardForm> {
 
     if (dropdownValue == 'Important') {
       widget.list.importantItems.add(item);
-      await widget.storage.setItem('important', widget.list.toListImp());
+      widget.storage.setItem('important', widget.list.toListImp());
     } else {
       widget.list.unimportantItems.add(item);
-      await widget.storage.setItem('unimportant', widget.list.toListUnimp());
+      widget.storage.setItem('unimportant', widget.list.toListUnimp());
     }
-
-    // * For seeing the values
-    // JsonEncoder encoder = const JsonEncoder.withIndent(' ');
-    // print(encoder.convert(widget.storage.getItem('important')));
+    Navigator.of(context).pop();
   }
 }
