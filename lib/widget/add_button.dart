@@ -98,8 +98,8 @@ class NewCardForm extends StatefulWidget {
 class _NewCardFormState extends State<NewCardForm> {
   late TextEditingController _controller;
 
-  List<String> dropDownList = ["Important", "Unimportant"];
-  String? dropdownValue;
+  List<String> dropDownList = ["important", "unimportant"];
+  late String dropdownValue;
   bool addATime = false;
 
   @override
@@ -160,7 +160,8 @@ class _NewCardFormState extends State<NewCardForm> {
                 items: dropDownList.map<DropdownMenuItem<String>>((String val) {
                   return DropdownMenuItem(
                     value: val,
-                    child: Center(child: Text(val)),
+                    child: Center(
+                        child: Text(val[0].toUpperCase() + val.substring(1))),
                   );
                 }).toList(),
                 onChanged: (String? value) {
@@ -303,9 +304,10 @@ class _NewCardFormState extends State<NewCardForm> {
       taskText: _controller.text,
       completed: false,
       time: timeToAdd,
+      taskType: dropdownValue,
     );
 
-    if (dropdownValue == 'Important') {
+    if (dropdownValue == 'important') {
       widget.list.importantItems.add(item);
       widget.storage.setItem('important', widget.list.toListImp());
     } else {

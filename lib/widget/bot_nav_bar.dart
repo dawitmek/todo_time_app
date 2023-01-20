@@ -31,7 +31,6 @@ class _HomeNavigationBarState extends State<HomeNavigationBar> {
       type: BottomNavigationBarType.fixed,
       currentIndex: currIndex,
       onTap: (int index) {
-        print('Current index: $currIndex, Clicked Index: $index');
         if (index == 0 && currIndex != 0) {
           Navigator.of(context).pushNamed('/home');
         }

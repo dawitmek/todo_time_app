@@ -21,14 +21,15 @@ class CardDataModel {
 
 class Item {
   Item({
-    required this.taskId,
     required this.taskText,
     required this.completed,
+    required this.taskType,
+    required this.taskId,
     this.time,
   });
 
+  final String taskType;
   final String taskId;
-
   final DateTime? time;
 
   String taskText;
@@ -40,6 +41,7 @@ class Item {
     itemData["taskText"] = taskText;
     itemData["completed"] = completed;
     itemData["time"] = time.toString();
+    itemData["taskType"] = taskType;
 
     return itemData;
   }

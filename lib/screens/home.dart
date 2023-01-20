@@ -156,6 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           taskId: item['taskId'],
                           taskText: item['taskText'],
                           completed: item['completed'],
+                          taskType: item['taskType'],
                         ),
                       ),
                     );
@@ -168,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           taskId: item['taskId'],
                           taskText: item['taskText'],
                           completed: item['completed'],
+                          taskType: item['taskType'],
                         ),
                       ),
                     );

@@ -240,7 +240,6 @@ class _CardDataWidgetState extends State<CardDataWidget> {
           ),
           InkWell(
             onTap: () {
-
               removeItem(currItem);
               // ! Ineffecient
               Navigator.of(context).pop();
@@ -270,7 +269,7 @@ class _CardDataWidgetState extends State<CardDataWidget> {
 
   void removeItem(Item currItem) {
     widget.items.removeAt(widget.items.indexOf(currItem));
-    widget.storage.setItem(currItem.taskId, widget.items);
+    widget.storage.setItem(currItem.taskType, widget.items);
   }
 
   void saveToStorage(String key) {
