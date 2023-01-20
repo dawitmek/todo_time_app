@@ -1,8 +1,10 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:todo_time_app/models/tasks.dart';
+
+import '../screens/home.dart';
 
 class CardModel extends StatefulWidget {
   const CardModel(
@@ -24,6 +26,8 @@ class CardModel extends StatefulWidget {
 }
 
 class _CardModelState extends State<CardModel> {
+  StreamController<int> stream = StreamController();
+
   @override
   Widget build(BuildContext context) {
     return Hero(
@@ -77,6 +81,7 @@ class _CardModelState extends State<CardModel> {
             items: widget.items,
             id: widget.id,
             list: widget.list,
+            cardColor: widget.cardColor,
           );
         },
       );
@@ -101,6 +106,7 @@ class CardDataWidget extends StatefulWidget {
     required this.items,
     required this.id,
     required this.list,
+    required this.cardColor,
   }) : super(key: key);
 
   final int index;
@@ -109,6 +115,7 @@ class CardDataWidget extends StatefulWidget {
   final List<Item> items;
   final String id;
   final CardDataModel list;
+  final Color cardColor;
 
   @override
   State<CardDataWidget> createState() => _CardDataWidgetState();
@@ -198,7 +205,6 @@ class _CardDataWidgetState extends State<CardDataWidget> {
     );
   }
 
-  // TODO: Add delete button
   Widget taskWidgets(bool canEdit, Item currItem) {
     if (canEdit) {
       return Row(
@@ -231,12 +237,40 @@ class _CardDataWidgetState extends State<CardDataWidget> {
               Icons.edit_note,
               color: !isReadOnly ? Colors.lightBlue : null,
             ),
+          ),
+          InkWell(
+            onTap: () {
+
+              removeItem(currItem);
+              // ! Ineffecient
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                HeroDialogRoute(
+                  builder: (context) => Center(
+                    child: CardModel(
+                      id: widget.id,
+                      cardColor: widget.cardColor,
+                      items: widget.items,
+                      storage: widget.storage,
+                      list: widget.list,
+                    ),
+                  ),
+                ),
+              );
+            },
+            splashColor: Colors.red,
+            child: const Icon(Icons.clear),
           )
         ],
       );
     } else {
       return Row();
     }
+  }
+
+  void removeItem(Item currItem) {
+    widget.items.removeAt(widget.items.indexOf(currItem));
+    widget.storage.setItem(currItem.taskId, widget.items);
   }
 
   void saveToStorage(String key) {

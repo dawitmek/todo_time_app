@@ -3,6 +3,7 @@ import 'package:localstorage/localstorage.dart';
 import 'package:todo_time_app/constant/vars.dart';
 import 'package:todo_time_app/models/tasks.dart';
 import 'package:todo_time_app/widget/add_button.dart';
+import 'package:todo_time_app/widget/bot_nav_bar.dart';
 import 'package:todo_time_app/widget/hours.dart';
 import 'package:todo_time_app/widget/time.dart';
 import 'package:todo_time_app/widget/todo.dart';
@@ -15,12 +16,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final LocalStorage storage = LocalStorage(
-    'data${DateTime.now().day.toString()}',
-  );
-  final LocalStorage nameStorage = LocalStorage(
-    'name',
-  );
+  final LocalStorage storage = LocalStorage(dataFile);
+  final LocalStorage nameStorage = LocalStorage(usernameFile);
   final CardDataModel listData = CardDataModel();
   bool initialized = false;
   late TextEditingController _nameEdit;
@@ -51,8 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     List<Item?> allTimeItems = [...impTimeItems, ...unimpTimeItems];
 
-    dynamic userName = nameStorage.getItem('username');
-
     return Scaffold(
       appBar: HomeAppBar(storage: storage, list: listData),
       body: Container(
@@ -72,59 +67,71 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     width: MediaQuery.of(context).size.width / 1.5,
                     padding: const EdgeInsets.only(left: 15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Hello $userName",
-                          style: const TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text("What are we doing today?",
-                            style: TextStyle(
-                              fontSize: 18,
-                            )),
-                      ],
-                    ),
+                    child: FutureBuilder(
+                        future: nameStorage.ready,
+                        builder: (context, snap) {
+                          dynamic userName = nameStorage.getItem('username');
+                          if (snap.data == null) {
+                            return const CircularProgressIndicator();
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Hello $userName",
+                                style: const TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text("What are we doing today?",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                  )),
+                            ],
+                          );
+                        }),
                   ),
                   Expanded(
                     flex: 1,
                     child: Center(
-                        child: InkWell(
-                      onTap: () => showDialog(
-                          context: context,
-                          builder: (BuildContext context) => AlertDialog(
-                                  backgroundColor: Colors.black,
-                                  actions: [
-                                    TextField(
-                                      autofocus: true,
-                                      decoration: const InputDecoration(
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide:
-                                                BorderSide(color: terColor),
-                                          ),
-                                          label: Text(
-                                            'Enter your new name',
-                                            style: TextStyle(color: mainColor),
-                                          )),
-                                      controller: _nameEdit,
-                                      onSubmitted: (newName) {
-                                        nameStorage.setItem('username', newName);
-                                        _nameEdit.clear();
-                                        Navigator.of(context).pop();
-                                      },
-                                    )
-                                  ])),
-                      child: const Icon(
-                        Icons.edit,
-                        color: Colors.white,
-                        size: 18,
+                      child: InkWell(
+                        onTap: () => showDialog(
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                                    backgroundColor: Colors.black,
+                                    actions: [
+                                      TextField(
+                                        autofocus: true,
+                                        decoration: const InputDecoration(
+                                            focusedBorder: UnderlineInputBorder(
+                                              borderSide:
+                                                  BorderSide(color: terColor),
+                                            ),
+                                            label: Text(
+                                              'Enter your new name',
+                                              style:
+                                                  TextStyle(color: mainColor),
+                                            )),
+                                        controller: _nameEdit,
+                                        onSubmitted: (newName) {
+                                          nameStorage.setItem(
+                                              'username', newName);
+                                          _nameEdit.clear();
+                                          Navigator.of(context).pop();
+                                        },
+                                      )
+                                    ])),
+                        customBorder: const CircleBorder(),
+                        child: const Icon(
+                          Icons.edit,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
-                    )),
+                    ),
                   ),
                 ],
               ),
@@ -299,15 +306,16 @@ class CardWidget extends StatelessWidget {
         // TOD: Change to GetX
         Navigator.of(context).push(
           HeroDialogRoute(
-              builder: (context) => Center(
-                    child: CardModel(
-                      id: heroTag,
-                      cardColor: cardColorParam,
-                      items: items,
-                      storage: storage,
-                      list: list,
-                    ),
-                  )),
+            builder: (context) => Center(
+              child: CardModel(
+                id: heroTag,
+                cardColor: cardColorParam,
+                items: items,
+                storage: storage,
+                list: list,
+              ),
+            ),
+          ),
         );
       },
       child: Hero(
@@ -340,6 +348,7 @@ class CardWidget extends StatelessWidget {
                             storage: storage,
                             id: heroTag,
                             list: list,
+                            cardColor: mainColor,
                           );
                         },
                       );
@@ -359,33 +368,6 @@ class CardWidget extends StatelessWidget {
               }),
         ),
       ),
-    );
-  }
-}
-
-// TODO: Add pages and functions
-class HomeNavigationBar extends StatelessWidget {
-  const HomeNavigationBar({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: const [
-        BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home,
-            ),
-            label: "Home"),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month), label: "Date"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-      ],
-      backgroundColor: Colors.black,
-      unselectedItemColor: Colors.grey,
-      selectedItemColor: mainColor,
-      type: BottomNavigationBarType.fixed,
     );
   }
 }

@@ -11,7 +11,7 @@ class FirstScreen extends StatefulWidget {
 }
 
 class _FirstScreenState extends State<FirstScreen> {
-  LocalStorage storage = LocalStorage('name');
+  LocalStorage nameStorage = LocalStorage(usernameFile);
   late TextEditingController _controller;
   late final FocusNode _focus = FocusNode();
 
@@ -47,13 +47,14 @@ class _FirstScreenState extends State<FirstScreen> {
                   controller: _controller,
                   textAlign: TextAlign.center,
                   focusNode: _focus,
-                  decoration: const InputDecoration(
-                    label: Text('Enter your name here.'),
-                    labelStyle: TextStyle(color: terColor),
-                    enabledBorder: OutlineInputBorder(
+                  decoration: InputDecoration(
+                    label: const Text('Enter your name here.'),
+                    labelStyle: const TextStyle(color: terColor),
+                    errorText: _errText(),
+                    enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: mainColor),
                     ),
-                    focusedBorder: OutlineInputBorder(
+                    focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: mainColor),
                     ),
                   ),
@@ -73,7 +74,7 @@ class _FirstScreenState extends State<FirstScreen> {
                     width: 200,
                     child: InkWell(
                       onTap: () {
-                        storage
+                        nameStorage
                             .setItem('username', _controller.text)
                             .then((value) {
                           Navigator.of(context).pop();
@@ -135,5 +136,13 @@ class _FirstScreenState extends State<FirstScreen> {
         backgroundColor: Colors.black,
       ),
     );
+  }
+
+  String? _errText() {
+    if (_controller.text.length < 4 && _focus.hasFocus) {
+      return 'Name must be more than 4 letters';
+    } else {
+      return null;
+    }
   }
 }

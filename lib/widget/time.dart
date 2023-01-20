@@ -3,6 +3,7 @@ import 'package:todo_time_app/constant/vars.dart';
 import 'package:todo_time_app/models/tasks.dart';
 import 'package:todo_time_app/widget/hours.dart';
 
+// ignore: must_be_immutable
 class TimeModel extends StatelessWidget {
   TimeModel({
     required this.id,
