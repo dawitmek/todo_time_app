@@ -70,7 +70,7 @@ class _DateScreenState extends State<DateScreen> {
                     width: double.infinity,
                     child: Builder(builder: (context) {
                       LocalStorage file = LocalStorage(
-                          '${current.year}-${current.month}-${current.day}');
+                          '${current.year}-${current.month < 10 ? '0${current.month}' : current.month}-${current.day < 10 ? '0${current.day}' : current.day}');
                       return FutureBuilder(
                           future: file.ready,
                           builder: (BuildContext context, AsyncSnapshot snap) {
