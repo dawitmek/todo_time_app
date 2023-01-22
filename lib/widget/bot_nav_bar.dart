@@ -3,8 +3,9 @@ import 'package:todo_time_app/constant/vars.dart';
 
 class HomeNavigationBar extends StatefulWidget {
   const HomeNavigationBar({
-    Key? key,
-  }) : super(key: key);
+    this.time,
+  super.key});
+  final DateTime? time;
 
   @override
   State<HomeNavigationBar> createState() => _HomeNavigationBarState();
@@ -32,7 +33,7 @@ class _HomeNavigationBarState extends State<HomeNavigationBar> {
       currentIndex: currIndex,
       onTap: (int index) {
         if (index == 0 && currIndex != 0) {
-          Navigator.of(context).pushNamed('/home');
+          Navigator.of(context).pushNamed('/home', arguments: widget.time);
         }
         if (index == 1 && currIndex != 1) {
           Navigator.of(context).pushNamed('/date');

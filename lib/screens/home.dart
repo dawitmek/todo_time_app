@@ -9,14 +9,18 @@ import 'package:todo_time_app/widget/time.dart';
 import 'package:todo_time_app/widget/todo.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    this.time,
+    super.key,
+  });
+
+  final DateTime? time;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final LocalStorage storage = LocalStorage(dataFile);
   final LocalStorage nameStorage = LocalStorage(usernameFile);
   final CardDataModel listData = CardDataModel();
   bool initialized = false;
@@ -37,6 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final LocalStorage storage =
+        LocalStorage(widget.time?.toString().split(' ')[0] ?? dataFile);
     List<Item> impTimeItems = [...listData.importantItems];
     List<Item> unimpTimeItems = [...listData.importantItems];
 

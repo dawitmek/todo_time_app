@@ -5,25 +5,28 @@ import 'package:todo_time_app/models/tasks.dart';
 import 'package:todo_time_app/widget/bot_nav_bar.dart';
 
 class DateScreen extends StatefulWidget {
-  const DateScreen({super.key});
+  const DateScreen({
+    this.time,
+    super.key,
+  });
+  final DateTime? time;
 
   @override
   State<DateScreen> createState() => _DateScreenState();
 }
 
 class _DateScreenState extends State<DateScreen> {
-  LocalStorage storage = LocalStorage(dataFile);
-
   @override
   Widget build(BuildContext context) {
-    DateTime currentTime = DateTime.now();
+    final LocalStorage storage = LocalStorage(dataFile);
+    DateTime dateNow = DateTime.now();
+    dynamic dateFromStorage = storage.getItem('date');
+    DateTime current =
+        DateTime.parse(dateFromStorage ?? DateTime.now().toIso8601String());
     return Scaffold(
       body: FutureBuilder(
           future: storage.ready,
           builder: (context, snap) {
-            dynamic date = storage.getItem('date');
-            DateTime current =
-                DateTime.parse(date ?? DateTime.now().toIso8601String());
             return Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -51,9 +54,8 @@ class _DateScreenState extends State<DateScreen> {
                       child: CalendarDatePicker(
                         currentDate: current,
                         initialDate: current,
-                        firstDate:
-                            DateTime(currentTime.year, currentTime.month),
-                        lastDate: currentTime,
+                        firstDate: DateTime(dateNow.year, dateNow.month),
+                        lastDate: dateNow,
                         onDateChanged: (DateTime val) {
                           setState(() {
                             current = val;
@@ -68,7 +70,7 @@ class _DateScreenState extends State<DateScreen> {
                     width: double.infinity,
                     child: Builder(builder: (context) {
                       LocalStorage file = LocalStorage(
-                          'data${current.year}-${current.month}-${current.day}');
+                          '${current.year}-${current.month}-${current.day}');
                       return FutureBuilder(
                           future: file.ready,
                           builder: (BuildContext context, AsyncSnapshot snap) {
@@ -121,8 +123,19 @@ class _DateScreenState extends State<DateScreen> {
               ),
             );
           }),
-      bottomNavigationBar: const HomeNavigationBar(),
+      bottomNavigationBar: HomeNavigationBar(time: current),
       resizeToAvoidBottomInset: false,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            current = DateTime.now();
+            storage.setItem('date', DateTime.now().toIso8601String());
+          });
+        },
+        backgroundColor: secColor,
+        tooltip: "Reset to current day",
+        child: const Icon(Icons.restart_alt),
+      ),
     );
   }
 }
