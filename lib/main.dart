@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:todo_time_app/api/noti_api.dart';
 import 'package:todo_time_app/constant/vars.dart';
 import 'package:todo_time_app/screens/date_screen.dart';
 import 'package:todo_time_app/screens/first_screen.dart';
@@ -14,8 +15,33 @@ Future main() async {
   FlutterNativeSplash.remove();
 }
 
-class Main extends StatelessWidget {
+class Main extends StatefulWidget {
   const Main({super.key});
+
+  @override
+  State<Main> createState() => _MainState();
+}
+
+class _MainState extends State<Main> {
+  @override
+  void initState() {
+    super.initState();
+
+    NotificationApi.init(initScheduled: true);
+    listenNotis();
+  }
+
+  void listenNotis() => NotificationApi.onNotis.stream.listen((event) {});
+
+  void onClickedNoti(String? payload) => Navigator.of(context).push(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return payload != null
+                ? HomeScreen(time: DateTime.parse(payload))
+                : const HomeScreen();
+          },
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {

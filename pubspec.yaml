@@ -12,8 +12,11 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
+  flutter_local_notifications: ^13.0.0
   flutter_native_splash: ^2.2.17
+  flutter_native_timezone: ^2.0.0
   localstorage: ^4.0.0+1
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_lints: ^2.0.0

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:todo_time_app/api/noti_api.dart';
 import 'package:todo_time_app/constant/vars.dart';
 import 'package:todo_time_app/models/tasks.dart';
 import 'package:todo_time_app/widget/add_button.dart';
@@ -273,6 +274,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                NotificationApi.showScheduleNoti(
+                  title: "Hello",
+                  message: "this is a message",
+                  scheduleTime: DateTime.now().add(const Duration(seconds: 3)),
+                  payload: DateTime(DateTime.now().year, DateTime.now().month, 2).toString(),
+                );
+              },
+              child: const Text('Click Here'),
             )
           ],
         ),
