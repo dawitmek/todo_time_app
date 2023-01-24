@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:todo_time_app/constant/vars.dart';
 
-class HomeNavigationBar extends StatefulWidget {
-  const HomeNavigationBar({
+class BottomNavBar extends StatefulWidget {
+  const BottomNavBar({
     this.time,
   super.key});
   final DateTime? time;
 
   @override
-  State<HomeNavigationBar> createState() => _HomeNavigationBarState();
+  State<BottomNavBar> createState() => _BottomNavBarState();
 }
 
-class _HomeNavigationBarState extends State<HomeNavigationBar> {
+class _BottomNavBarState extends State<BottomNavBar> {
   static int currIndex = 0;
   @override
   Widget build(BuildContext context) {

@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Item> timeItemsList(LocalStorage file) {
     List<Item> impTimeItems = [...listData.importantItems];
-    List<Item> unimpTimeItems = [...listData.importantItems];
+    List<Item> unimpTimeItems = [...listData.unimportantItems];
 
     impTimeItems.removeWhere((element) {
       return element.time == null;
@@ -57,16 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final LocalStorage storage =
         LocalStorage(widget.time?.toString().split(' ')[0] ?? dataFile);
-    List<Item> impTimeItems = [...listData.importantItems];
-    List<Item> unimpTimeItems = [...listData.importantItems];
-
-    impTimeItems.removeWhere((element) {
-      return element.time == null;
-    });
-    unimpTimeItems.removeWhere((element) {
-      return element.time == null;
-    });
-    List<Item?> allTimeItems = [...impTimeItems, ...unimpTimeItems];
 
     return Scaffold(
       appBar: HomeAppBar(storage: storage, list: listData),
@@ -177,6 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           taskText: item['taskText'],
                           completed: item['completed'],
                           taskType: item['taskType'],
+                          time: DateTime.parse(item['time']),
                         ),
                       ),
                     );
@@ -190,6 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           taskText: item['taskText'],
                           completed: item['completed'],
                           taskType: item['taskType'],
+                          time: DateTime.parse(item['time']),
                         ),
                       ),
                     );
@@ -200,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 List<Item> list = timeItemsList(storage);
 
                 for (var item in list) {
-                  if (!item.notiState) {
+                  if (!item.notiState && item.time!.isAfter(DateTime.now())) {
                     NotificationApi.showScheduleNoti(
                       title: "Task due",
                       message: "You have a task thats due at ${item.time}.",
@@ -249,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       child: TimeModel(
                                         id: "time",
                                         timeColor: terColor,
-                                        timeItems: allTimeItems,
+                                        timeItems: timeItemsList(storage),
                                       ),
                                     )),
                           );
@@ -284,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             itemBuilder: (BuildContext context,
                                                 int index) {
                                               return HourWidget(
-                                                items: allTimeItems,
+                                                items: timeItemsList(storage),
                                                 hour: index,
                                                 txtBgColor: terColor,
                                               );
@@ -306,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const HomeNavigationBar(),
+      bottomNavigationBar: const BottomNavBar(),
       resizeToAvoidBottomInset: false,
     );
   }
@@ -422,7 +414,7 @@ class HomeAppBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     List<Item> impTimeItems = [...list.importantItems];
-    List<Item> unimpTimeItems = [...list.importantItems];
+    List<Item> unimpTimeItems = [...list.unimportantItems];
 
     impTimeItems.removeWhere((element) {
       return element.time == null;

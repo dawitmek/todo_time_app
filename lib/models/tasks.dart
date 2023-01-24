@@ -41,7 +41,7 @@ class Item {
     itemData["taskId"] = taskId;
     itemData["taskText"] = taskText;
     itemData["completed"] = completed;
-    itemData["time"] = time.toString();
+    itemData["time"] = time != null ? time!.toIso8601String() : null;
     itemData["taskType"] = taskType;
     itemData["notiState"] = notiState;
 

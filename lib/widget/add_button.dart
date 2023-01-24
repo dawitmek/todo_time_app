@@ -101,6 +101,8 @@ class _NewCardFormState extends State<NewCardForm> {
   List<String> dropDownList = ["important", "unimportant"];
   late String dropdownValue;
   bool addATime = false;
+  DateTime timeToAdd = DateTime(
+      DateTime.now().year, DateTime.now().month, DateTime.now().day, 12, 0);
 
   @override
   void initState() {
@@ -117,9 +119,6 @@ class _NewCardFormState extends State<NewCardForm> {
 
   @override
   Widget build(BuildContext context) {
-    DateTime timeToAdd = DateTime(
-        DateTime.now().year, DateTime.now().month, DateTime.now().day, 24, 0);
-
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
       return Container(
@@ -248,7 +247,6 @@ class _NewCardFormState extends State<NewCardForm> {
                   }()),
                   InkWell(
                     onTap: () {
-                      //TODO: Check that time is in the future
                       DateTime? val = !addATime ? null : timeToAdd;
                       bool found = false;
                       for (var item in widget.timeItems) {
@@ -256,9 +254,25 @@ class _NewCardFormState extends State<NewCardForm> {
                           found = true;
                         }
                       }
-                      !found
-                          ? addTodoAndSave(val, context)
-                          : timeErrorDialogue(context);
+
+                      if (val != null) {
+                        if (val.isBefore(DateTime.now())) {
+                          timeErrorDialogue(
+                            context: context,
+                            title: 'Time has passed',
+                            message:
+                                "Can't select time that has already passed",
+                          );
+                        } else if (found) {
+                          timeErrorDialogue(
+                            context: context,
+                            title: 'There is already a task with that time.',
+                            message: 'Please switch to different time.',
+                          );
+                        } else {
+                          addTodoAndSave(val, context);
+                        }
+                      }
                     },
                     child: Container(
                       width: constraints.maxWidth,
@@ -280,14 +294,16 @@ class _NewCardFormState extends State<NewCardForm> {
     });
   }
 
-  Future<void> timeErrorDialogue(BuildContext context) {
+  Future<void> timeErrorDialogue(
+      {required BuildContext context,
+      required String title,
+      required String message}) {
     return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('There is already a task with that time.',
-                style: TextStyle(color: Colors.black)),
-            content: const Text('Please switch to another time.'),
+            title: Text(title, style: const TextStyle(color: Colors.black)),
+            content: Text(message),
             contentTextStyle: const TextStyle(color: Colors.black),
             actions: [
               TextButton(

@@ -124,7 +124,7 @@ class _DateScreenState extends State<DateScreen> {
               ),
             );
           }),
-      bottomNavigationBar: HomeNavigationBar(time: current),
+      bottomNavigationBar: BottomNavBar(time: current),
       resizeToAvoidBottomInset: false,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
