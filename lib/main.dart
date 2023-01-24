@@ -86,7 +86,7 @@ class _MainState extends State<Main> {
           return MaterialPageRoute(
             builder: (context) {
               return HomeScreen(
-                time: time as DateTime,
+                time: time != null ? time as DateTime : null,
               );
             },
           );

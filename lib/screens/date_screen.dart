@@ -22,11 +22,12 @@ class _DateScreenState extends State<DateScreen> {
     DateTime dateNow = DateTime.now();
     dynamic dateFromStorage = storage.getItem('date');
     DateTime current =
-        DateTime.parse(dateFromStorage ?? DateTime.now().toIso8601String());
+        DateTime.parse(dateFromStorage ?? dateNow.toIso8601String());
+    // TODO: Fix time storage issue
     return Scaffold(
       body: FutureBuilder(
           future: storage.ready,
-          builder: (context, snap) {
+          builder: (BuildContext context, AsyncSnapshot snap) {
             return Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -128,8 +129,8 @@ class _DateScreenState extends State<DateScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
-            current = DateTime.now();
-            storage.setItem('date', DateTime.now().toIso8601String());
+            current = dateNow;
+            storage.setItem('date', dateNow.toIso8601String());
           });
         },
         backgroundColor: secColor,

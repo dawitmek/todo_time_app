@@ -32,6 +32,7 @@ class Item {
   final String taskId;
   final DateTime? time;
 
+  bool notiState = false;
   String taskText;
   bool completed;
 
@@ -42,6 +43,7 @@ class Item {
     itemData["completed"] = completed;
     itemData["time"] = time.toString();
     itemData["taskType"] = taskType;
+    itemData["notiState"] = notiState;
 
     return itemData;
   }

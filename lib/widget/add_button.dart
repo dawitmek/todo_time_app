@@ -212,8 +212,9 @@ class _NewCardFormState extends State<NewCardForm> {
                     value: addATime,
                     activeColor: mainColor,
                     onChanged: (bool val) {
-                      setState(() {});
-                      addATime = val;
+                      setState(() {
+                        addATime = val;
+                      });
                     },
                   )
                 ],
@@ -227,8 +228,13 @@ class _NewCardFormState extends State<NewCardForm> {
                     if (addATime) {
                       return Expanded(
                           child: CupertinoDatePicker(
-                        initialDateTime: DateTime(DateTime.now().year,
-                            DateTime.now().month, DateTime.now().day, 24, 0),
+                        initialDateTime: DateTime(
+                          DateTime.now().year,
+                          DateTime.now().month,
+                          DateTime.now().day,
+                          12,
+                          0,
+                        ),
                         mode: CupertinoDatePickerMode.time,
                         use24hFormat: false,
                         minuteInterval: 30,
@@ -242,6 +248,7 @@ class _NewCardFormState extends State<NewCardForm> {
                   }()),
                   InkWell(
                     onTap: () {
+                      //TODO: Check that time is in the future
                       DateTime? val = !addATime ? null : timeToAdd;
                       bool found = false;
                       for (var item in widget.timeItems) {

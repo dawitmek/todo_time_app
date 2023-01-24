@@ -33,6 +33,19 @@ class _HomeScreenState extends State<HomeScreen> {
     _nameEdit = TextEditingController();
   }
 
+  List<Item> timeItemsList(LocalStorage file) {
+    List<Item> impTimeItems = [...listData.importantItems];
+    List<Item> unimpTimeItems = [...listData.importantItems];
+
+    impTimeItems.removeWhere((element) {
+      return element.time == null;
+    });
+    unimpTimeItems.removeWhere((element) {
+      return element.time == null;
+    });
+    return [...impTimeItems, ...unimpTimeItems];
+  }
+
   @override
   void dispose() {
     _nameEdit.dispose();
@@ -184,6 +197,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   initialized = true;
                 }
 
+                List<Item> list = timeItemsList(storage);
+
+                for (var item in list) {
+                  if (!item.notiState) {
+                    NotificationApi.showScheduleNoti(
+                      title: "Task due",
+                      message: "You have a task thats due at ${item.time}.",
+                      scheduleTime: item.time!,
+                      payload: item.time!.toString(),
+                    );
+
+                    item.notiState = true;
+                  }
+                }
+
                 return Expanded(
                   child: Row(
                     children: [
@@ -275,17 +303,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-            ElevatedButton(
-              onPressed: () {
-                NotificationApi.showScheduleNoti(
-                  title: "Hello",
-                  message: "this is a message",
-                  scheduleTime: DateTime.now().add(const Duration(seconds: 3)),
-                  payload: DateTime(DateTime.now().year, DateTime.now().month, 2).toString(),
-                );
-              },
-              child: const Text('Click Here'),
-            )
           ],
         ),
       ),
