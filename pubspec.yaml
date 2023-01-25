@@ -1,7 +1,7 @@
 name: todo_time_app
 description: A new Flutter project.
 
-publish_to: "none" # Remove this line if you wish to publish to pub.dev
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -22,10 +22,22 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
+  # flutter_launcher_icons: ^0.11.0
 
 flutter_native_splash:
   color: "#000000"
   image: assets/icon.png
+  android: true
+  ios: true
+  web: false
+  android_12:
+    image: assets/icon.png
+    color: "#000000"
+
+# flutter_icons:
+#   android: true
+#   ios: true
+#   image_path: "todo_time_app/assets/icon.png"
 
 flutter:
   uses-material-design: true

@@ -195,8 +195,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (!item.notiState && item.time!.isAfter(DateTime.now())) {
                     NotificationApi.showScheduleNoti(
                       title: "Task due",
-                      message: "You have a task thats due at ${item.time}.",
-                      scheduleTime: item.time!,
+                      message:
+                          "You have a task thats due at ${convertHour(item)} (in 30 minutes).",
+                      scheduleTime:
+                          item.time!.subtract(const Duration(minutes: 30)),
                       payload: item.time!.toString(),
                     );
 
@@ -301,6 +303,18 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: const BottomNavBar(),
       resizeToAvoidBottomInset: false,
     );
+  }
+
+  String convertHour(Item item) {
+    int hour = item.time!.hour;
+    bool daytime = item.time!.hour <= 12;
+    String minute = item.time.toString().split(':')[1];
+    if (daytime) {
+      return '${hour == 0 ? 12 : (hour.toString().length < 2 ? '0$hour' : hour)}:$minute am';
+    } else {
+      int pmHour = hour - 12;
+      return '${pmHour == 0 ? 12 : pmHour.toString().length < 2 ? '0$pmHour' : pmHour}:$minute pm';
+    }
   }
 }
 
@@ -513,10 +527,8 @@ class HomeAppBar extends StatelessWidget with PreferredSizeWidget {
 }
 
 class HeroDialogRoute<T> extends PageRoute<T> {
-  /// {@macro hero_dialog_route}
   HeroDialogRoute({
     required WidgetBuilder builder,
-    // RouteSettings settings,
     bool fullscreenDialog = false,
   })  : _builder = builder,
         super(fullscreenDialog: fullscreenDialog);

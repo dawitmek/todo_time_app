@@ -15,7 +15,9 @@ class HourWidget extends StatelessWidget {
   final Color txtBgColor;
   final List<Item?> items;
 
-  // TODO: Refrator usability and effeciency
+  // TODO: Refrator usability and effeciency ( too many loops)
+
+  // TODO: Show only certain times
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +134,7 @@ class HourWidget extends StatelessWidget {
   * 
    */
 
-    Container dayOrNight(String txt) {
+    Container amOrPm(String txt) {
       return Container(
         padding: const EdgeInsets.only(right: 5, left: 5),
         decoration: BoxDecoration(
@@ -148,12 +150,12 @@ class HourWidget extends StatelessWidget {
     }
 
     if (dayTime) {
-      return dayOrNight(
+      return amOrPm(
         '${hour == 0 ? 12 : (hour.toString().length < 2 ? '0$hour' : hour)}:00 am',
       );
     } else {
       int pmHour = hour - 12;
-      return dayOrNight(
+      return amOrPm(
         '${pmHour == 0 ? 12 : pmHour.toString().length < 2 ? '0$pmHour' : pmHour}:00 pm',
       );
     }

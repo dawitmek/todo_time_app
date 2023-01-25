@@ -23,7 +23,6 @@ class _DateScreenState extends State<DateScreen> {
     dynamic dateFromStorage = storage.getItem('date');
     DateTime current =
         DateTime.parse(dateFromStorage ?? dateNow.toIso8601String());
-    // TODO: Fix time storage issue
     return Scaffold(
       body: FutureBuilder(
           future: storage.ready,

@@ -29,6 +29,8 @@ class _FirstScreenState extends State<FirstScreen> {
     super.dispose();
   }
 
+  // TODO: Ask for time user wakes up for time settings
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
